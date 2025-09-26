@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <title>Animal Lab</title>
+   <style>
+      .animal img {
+         pointer-events: auto;
+         width: auto;
+         height: auto;
+         object-fit: unset;
+      }
+      .animal {
+         position: absolute;
+         cursor: grab;
+         user-select: none;
+      }
+      #center-blank {
+         position: fixed;
+         left: 50%;
+         top: 50%;
+         width: 500px;
+         height: 500px;
+         transform: translate(-50%, -50%);
+         background: #fff;
+         z-index: -1;
+         border: 2px dashed #ccc;
+      }
+   </style>
+</head>
+<body>     
+<h1 style="text-align:center;font-size:2.5em;font-family:sans-serif;margin-top:32px;margin-bottom:16px;color:#222;text-shadow:0 2px 8px #ccc;letter-spacing:2px;">Create Your Own Cool Creature!</h1>
+<div id="d" style="position:absolute;left:370;top:500;">
+<div class="animal" style="left:1600px;top:1030px;"><img src="img/bird-b.png"></div>
+<div class="animal" style="left:1700px;top:950px;"><img src="img/bird-b2.png"></div>
+<div class="animal" style="left:360px;top:350px;"><img src="img/butterfly2.png"></div>
+<div class="animal" style="left:350px;top:250px;"><img src="img/butterfly-l.png"></div>
+<div class="animal" style="left:240px;top:260px;"><img src="img/butterfly-r.png"></div>
+<div class="animal" style="left:29px;top:27px;"><img src="img/tiger-b.png"></div>
+<div class="animal" style="left:130px;top:330px;"><img src="img/giraffe-b1.png"></div>
+<div class="animal" style="left:18px;top:350px;"><img src="img/giraffe-b2.png"></div>
+<div class="animal" style="left:200px;top:740px;"><img src="img/horse-b3.png"></div>
+<div class="animal" style="left:350px;top:700px;"><img src="img/horse-b2.png"></div>
+<div class="animal" style="left:22px;top:690px;"><img src="img/giraffe-b4.png"></div>
+<div class="animal" style="left:230px;top:440px;"><img src="img/giraffe-b3.png"></div>
+<div class="animal" style="left:10px;top:950px;"><img src="img/horse-b4.png"></div>
+<div class="animal" style="left:230px;top:1050px;"><img src="img/horse-b.png"></div>
+<div class="animal" style="left:180px;top:10px;"><img src="img/dog-b.png"></div>
+<div class="animal" style="left:370px;top:45px;"><img src="img/jellyfish.png"></div>
+<div class="animal" style="left:370px;top:500px;"><img src="img/butterfly1.png"></div>
+<div class="animal" style="left:1900px;top:800px;"><img src="img/bird.png"></div>
+<div class="animal" style="left:1800px;top:680px;"><img src="img/cat.png"></div>
+<div class="animal" style="left:1550px;top:680px;"><img src="img/deer.png"></div>
+<div class="animal" style="left:1450px;top:260px;"><img src="img/deer2.png"></div>
+<div class="animal" style="left:1700px;top:820px;"><img src="img/dog.png"></div>
+<div class="animal" style="left:1750px;top:420px;"><img src="img/elephant.png"></div>
+<div class="animal" style="left:1900px;top:570px;"><img src="img/elephant2.png"></div>
+<div class="animal" style="left:1700px;top:220px;"><img src="img/giraffe.png"></div>
+<div class="animal" style="left:1500px;top:0px;"><img src="img/giraffe2.png"></div>
+<div class="animal" style="left:1830px;top:10px;"><img src="img/horse.png"></div>
+<div class="animal" style="left:2000px;top:45px;"><img src="img/horse1.png"></div>
+<div class="animal" style="left:1600px;top:190px;"><img src="img/lion.png"></div>
+<div class="animal" style="left:1600px;top:600px;"><img src="img/owl.png"></div>
+<div class="animal" style="left:1625px;top:475px;"><img src="img/tiger.png"></div>
+
+<script>
+// 隨機不重疊排版（等所有圖片載入完成）
+function randomLayout() {
+   const animals = Array.from(document.querySelectorAll('.animal'));
+   const padding = 10;
+   const maxW = window.innerWidth - padding;
+   const maxH = window.innerHeight - padding;
+   const placed = [];
+   // 中央空白區域座標
+   const blankW = 500, blankH = 500;
+   const blankLeft = window.innerWidth / 2 - blankW / 2;
+   const blankTop = window.innerHeight / 2 - blankH / 2;
+   animals.forEach(function(el) {
+      const img = el.querySelector('img');
+      let imgW = img.naturalWidth * 0.75;
+      let imgH = img.naturalHeight * 0.75;
+      img.style.width = imgW + 'px';
+      img.style.height = 'auto';
+      let tries = 0;
+      let left, top, overlap, inBlank;
+      do {
+         left = Math.floor(Math.random() * (maxW - imgW));
+         top = Math.floor(Math.random() * (maxH - imgH));
+         // 檢查是否有任何部分進入中央空白區域（只要有重疊就排除）
+         inBlank = !(left + imgW < blankLeft || left > blankLeft + blankW || top + imgH < blankTop || top > blankTop + blankH);
+         overlap = placed.some(function(p) {
+            return !(left + imgW + padding < p.left ||
+                   left > p.left + p.imgW + padding ||
+                   top + imgH + padding < p.top ||
+                   top > p.top + p.imgH + padding);
+         });
+         tries++;
+      } while ((overlap || inBlank) && tries < 2000);
+      el.style.left = left + 'px';
+      el.style.top = top + 'px';
+      placed.push({left, top, imgW, imgH});
+   });
+
+   // 拖曳功能 for .animal
+   let zCounter = 1;
+   animals.forEach(function(el) {
+      let offsetX, offsetY, dragging = false;
+      el.addEventListener('mousedown', function(e) {
+         dragging = true;
+         offsetX = e.clientX - el.offsetLeft;
+         offsetY = e.clientY - el.offsetTop;
+         el.style.cursor = 'grabbing';
+         zCounter++;
+         el.style.zIndex = zCounter;
+      });
+      document.addEventListener('mousemove', function(e) {
+         if (dragging) {
+            el.style.left = (e.clientX - offsetX) + 'px';
+            el.style.top = (e.clientY - offsetY) + 'px';
+         }
+      });
+      document.addEventListener('mouseup', function() {
+         dragging = false;
+         el.style.cursor = 'grab';
+      });
+   });
+}
+
+// 雙擊圖片左右翻轉（確保所有圖片都能綁定事件）
+document.addEventListener('DOMContentLoaded', function() {
+   document.querySelectorAll('.animal img').forEach(function(img) {
+      img.addEventListener('dblclick', function(e) {
+         if (img.style.transform === 'scaleX(-1)') {
+            img.style.transform = '';
+         } else {
+            img.style.transform = 'scaleX(-1)';
+         }
+      });
+   });
+});
+
+window.onload = function() {
+   const imgs = Array.from(document.querySelectorAll('.animal img'));
+   let loaded = 0;
+   imgs.forEach(function(img) {
+      if (img.complete) {
+         loaded++;
+      } else {
+         img.onload = function() {
+            loaded++;
+            if (loaded === imgs.length) randomLayout();
+         };
+      }
+   });
+   if (loaded === imgs.length) randomLayout();
+}
+</script>
+</body>
+
+<div id="center-blank"></div>
+<div style="position:fixed;left:50%;top:calc(50% + 250px);transform:translateX(-50%);width:500px;text-align:center;font-size:1.2em;color:#444;background:rgba(255,255,255,0.85);padding:12px 0 8px 0;border-radius:0 0 16px 16px;box-shadow:0 2px 8px #eee;z-index:0;">
+Use your mouse to drag and combine parts. Double-click to flip left/right.
+</div>
+
+<div id="d" style="position:absolute;left:370;top:500;">
