@@ -137,6 +137,48 @@ document.addEventListener('DOMContentLoaded', function() {
          }
       });
    });
+
+   // 點選圖片後，按 A/D 鍵可左右旋轉
+   let selectedImg = null;
+   document.querySelectorAll('.animal img').forEach(function(img) {
+      img.addEventListener('click', function(e) {
+         selectedImg = img;
+         // 高亮選中（可自訂樣式）
+         document.querySelectorAll('.animal img').forEach(function(i) {
+            i.style.boxShadow = '';
+         });
+         img.style.boxShadow = '0 0 0 4px #1976d2';
+      });
+   });
+   document.addEventListener('keydown', function(e) {
+      if (!selectedImg) return;
+      let current = selectedImg.style.transform || '';
+      // 取得目前 rotate 角度
+      let match = current.match(/rotate\((-?\d+)deg\)/);
+      let deg = match ? parseInt(match[1]) : 0;
+      // 保留 scaleX(-1) 翻轉
+      let flip = current.includes('scaleX(-1)') ? 'scaleX(-1) ' : '';
+      // 取得目前縮放
+      let scaleMatch = current.match(/scale\(([-\d\.]+)\)/);
+      let scale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+      let updated = false;
+      if (e.key === 'a' || e.key === 'A') {
+         deg -= 15;
+         updated = true;
+      } else if (e.key === 'd' || e.key === 'D') {
+         deg += 15;
+         updated = true;
+      } else if (e.key === 'w' || e.key === 'W') {
+         scale = Math.min(scale + 0.1, 3);
+         updated = true;
+      } else if (e.key === 's' || e.key === 'S') {
+         scale = Math.max(scale - 0.1, 0.3);
+         updated = true;
+      }
+      if (updated) {
+         selectedImg.style.transform = flip + 'rotate(' + deg + 'deg) scale(' + scale + ')';
+      }
+   });
 });
 
 window.onload = function() {
@@ -159,7 +201,10 @@ window.onload = function() {
 
 <div id="center-blank"></div>
 <div style="position:fixed;left:50%;top:calc(50% + 250px);transform:translateX(-50%);width:500px;text-align:center;font-size:1.2em;color:#444;background:rgba(255,255,255,0.85);padding:12px 0 8px 0;border-radius:0 0 16px 16px;box-shadow:0 2px 8px #eee;z-index:0;">
-Use your mouse to drag and combine parts. Double-click to flip left/right.
+Use your mouse to drag and combine parts.<br>
+Double-click to flip left/right.<br>
+Click to select, then use:<br>
+A/D to rotate, W/S to scale.
 </div>
 
 <div id="d" style="position:absolute;left:370;top:500;">
